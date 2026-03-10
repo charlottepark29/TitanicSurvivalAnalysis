@@ -1,0 +1,172 @@
+---
+title: "Surviving the Titanic"
+author: "Anissa , Elsa, Charlotte"
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+titanic_dataset_1 <- read.csv("train.csv")
+titanic_dataset_2 <- read.csv("titanic_dataset2.csv")
+```
+
+# Section I: Providing Data Context
+
+## **Data set #1 :**
+
+Data link: <https://www.kaggle.com/competitions/titanic/data>
+
+Data Source: Our data set #1 is from Kaggle and was collected from historical passenger records including the manifest information. Kaggle is owned by Google is a well known established hub for reliable data sets. It was compiled and organized by multiple people and displays information from the Encyclopedia Titanica database. The Titanic data set we are using in particularly is one of the most famous beginner data sets often used worldwide for educational and research purposes.
+
+Data Meaning: Our data represents the real passenger information of those who boarded the RMS Titanic in 1912. Each row in the data set corresponds to one passenger and includes demographic, social, and economic characteristics such as gender, age, and passenger class.
+
+Data Join: With this data set we intend to join demographic and socioeconomic features like gender and age. For now we have not changed any feature between the two sets and joined them successfully because the column of passenger names come up to be the same.
+
+Data Observations: The Titanic data set (titanic_dataset_1) includes 891 (passengers) rows and 12 columns of various information such as Name, Age, Sex, Ticket Class, and whether they survived.
+
+```{r}
+glimpse(titanic_dataset_1)
+```
+
+Data Issues: The Titanic data set contains some missing values and data quality issues. For example some ages of the passengers weren't recorded which results in missing values. While some cabin crew numbers were never documented which also creates the issue of missing values. These issues do not make the data set unreliable as this is the reality and common problems that arise when working with real world data. Especially with information that dates back to 100 years it is not surprising that these issues are present. So overall this data set remains reliable although it does need some filtering and cleaning.
+
+# Section II: Providing Data Context
+
+## Data set 2:
+
+Data Link: https://data.world/nrippner/titanic-disaster-dataset
+
+Data Source: This data set is from data.world which is a data catalog like Kaggle and was posted by Noah Rippner. The data was collected from historical records of the Titanic passengers like manifestos that recorded the passenger data, as well as records that shared bodies recovered and the boats the survived escaped on. The source is reliable because it is based on primary historical documents and has been cleaned and validated across multiple independent releases, demonstrating that it is a reliable data set.
+
+Data Meaning: The data represents individual Titanic passenger and includes some of the same demographic information as the first data set, along with data on the boats surviving passengers escaped on, number of when the body was recovered, and primary home destination or intended home destination. The information on home destination can share class information by giving insight on if the voyage for the passenger was more for pleasure or transportation.
+
+Data Join: We intended on joining the datasets using the passenger name, but with many of the columns exsisting in both data sets we needed to join using multiple columns to get rid of redundancies.
+
+Data Observations: This data set contains 12 columns with the new included information being home.dest, body, and boat. Home destination is a column that includes both the hometown of some passengers and the indented settling home of others. Some passengers were returning home to Europe after visiting the U.S. while others value represented where they were planning to live in America. The body data shares all 337 recovered body in order and the boat data represents the boat the passenger escaped on. The boats were labeled 1-16, but there were also 4 smaller boats that were labeled A, B, C, and D, which makes the data a little confusing for this column as there are both letter and number values.
+
+Data Issues: Like the first data set there are missing values in several variables. Both boat and body have lots of missing values because they can only be populated depending on survival or not. Also some columns have inconsistencies in how some variables are recorded. For example, the home.dest column contains entries at different levels of detail, ranging from full city and country names to vague or incomplete locations, which makes geographic comparisons difficult without further cleaning.
+
+```{r}
+glimpse(titanic_dataset_2)
+```
+
+# Section III: Joining the Data
+
+## Data Join (code & glimpse)
+
+```{r}
+joined_df <- titanic_dataset_1 |>
+  inner_join(
+    titanic_dataset_2,
+    join_by(Name == name, Sex == sex, Survived == survived, Pclass == pclass, Embarked == embarked, Age == age, Ticket == ticket, Fare == fare, Cabin == cabin)
+  )
+glimpse(joined_df)
+```
+
+## Data Documentation
+
+Our final joined data set (joined_df) provides 15 columns with even more information about the passengers than either of the individual data frames show. I am aware that our joined data frame comes from two websites (Kaggle and Data World) which are open for anybody to upload data onto. Although this titanic data is well-known and viewed as a reliable source, it was still uploaded by a group of people who I am unfamiliar with. On Kaggle, this group used information from Encyclopedia Titanica which was founded and largely written by Philip Hind. On Data World, the second website, the titanic data was uploaded by Noah Rippner. Both of these people are White American men who are wealthy enough to benefit from these large data companies. They could have biases in the way they upload data. This could impact the representation of titanic passengers who are of lower classes, aren’t American, or are women. Also, because the data on Kaggle comes from another site, there could be limitations to how it was brought over and could be incomplete since it wasn’t collected firsthand. 
+
+Joined Dataframe Codebook:
+
+1.  PassengerId: Number (ID) assigned to each passenger in this data frame to make it easier to organize and keep track of the data
+
+2.  Survived: 0 = Didn’t survive, 1 = Survived
+
+    1.  This column will be cleaned and made easier to interpret in Section IV
+
+3.  Pclass: Ticket Class, 1 = first class, 2 = second class, 3 = third class
+
+4.  Name: Formatted as “Last Name, First Name (nickname)”
+
+5.  Sex: Divided into male and female
+
+6.  Age: Age
+
+7.  SibSp: The number of siblings and/or spouses that this person had aboard the Titanic with them
+
+8.  Parch: The number of parents and/or children that this person had aboard the Titanic with them
+
+9.  Ticket: Ticket Number, the alphabetical prefixes in front represent different booking agencies and was a way of organizing the ticket information. For example, having “PC” in front of the ticket number meant a private cabin.
+
+10. Fare: Price of ticket (In British Pounds £)
+
+11. Cabin: Cabin Number, about 80% of them were lost when the boat sunk and second/third class passengers didn’t have any records that kept track of their cabin number
+
+12. Embarked: Port that the titanic picked them up from. C = Cherbourg, Q = Queenstown, S = Southampton
+
+13. Boat: (If: survived) Lifeboat the surviving passenger was on
+
+14. Body: (if: died) Body number of the dead passenger, assigned by recovery vessels in the order that these passengers were recovered. Note - not all dead passengers were recovered.
+
+15. Home.dest: A passenger’s home city/location that they were intending to travel to
+
+The most relevant variables that we intend to use as part of our group project are Survived, Pclass & Fare, Sex, Age, and SibSp/Parch. These variables give us the most insight on survival statistics and will be the most meaningful when we make conclusions about how people behaved in times of crisis on the Titanic.
+
+Although our dataset comes from two reliable online sources, it is still not perfect. The data we got was from public sources, meaning that anyone can access it and interpret it which could lead to privacy issues as well as less professionalism since it was uploaded by people on the internet. The data is relatively safe and secure since it is backed up from multiple sources, which also makes it transparent. It might not be as fair as possible since a lot of the contributors to both the Kaggle and Data World data frames are white American men who might view the people aboard the Titanic differently depending on their lens. Overall we are satisfied with the data due to how trustworthy, widely-used, and reliable the websites are, but it is still important to remain conscious of potential biases that can arise.
+
+# Section IV: Data Wrangling
+
+1\) Clean a column of data (e.g., fix values, change char data types to date data types, etc.)
+
+#### **Before in the joined_df set the column "Survived" would give a numeric value of "0" for those who are dead and a "1" for those alive, now with this code there is no longer a numeric value but instead an actual word status.**
+
+```{r}
+joined_df <- joined_df %>%
+  mutate(Survived = ifelse(Survived == 0, "dead", "alive"))
+```
+
+2\) Create a summary data frame based on your joined data (e.g., using group_by() and summarize())
+
+#### We created another data frame set that includes both men and women summaries together.
+
+```{r}
+gender_survival <- joined_df %>%
+  group_by(Sex) %>%
+  summarise(
+    total = n(),
+    survived = sum(Survived == "alive"),
+  )
+```
+
+3\) Make a graph based on your joined data
+
+#### A bar graph showing a side by side comparison of deaths by gender.
+
+```{r}
+ggplot(gender_survival) +
+  geom_col(mapping = aes(
+    x = Sex,
+    y= survived,
+    fill = Sex ) )
+```
+
+# Section V: Providing Group Information
+
+## Group Information:
+
+#### The question we want to answer is what would make you most likely to have survived the Titanic. We want to look at factors like age, sex, class of ticket, family relations, and other factors that might have impacted survival rate. The tragedy of the Titanic is often framed as a tragedy of technological error, but it can also tell us about a deeper narrative about inequality, social norms, and human behavior in crisis. The theme we want to focus on is how survival in the Titanic was not random, but was actually heavily influenced by social hierarchies and relationships. 
+
+LAB SECTION: Section BB Tuesday 1:30pm - 2:20pm , TA: Sophia Dai
+
+### Anissa Vichitthavong (Pre-Science, University of Washington; anissav\@uw.edu)
+
+I am interested in the Titanic topic because the tragedy is still surrounded by mystery, and many details will never be fully known since so much history was lost beneath the ocean. As a freshman at the university, I am still exploring different career paths, but I am interested in informatics because I like how it is technical and involves working with real-world data.
+
+### Charlotte Park (Informatics, University of Washington, cpark29\@uw.edu)
+
+I think that our topic on the Titanic is both interesting and relevant because it gives us insight into social norms in crisis which can highlight inequalities. I am interested in the stories that data can tell us much beyond numbers, and am very interested in how data and technology systems can be utilized to address global issues and inequalities.
+
+### Elsa Boardman (Pre-Science, University of Washington, elsab29\@uw.edu
+
+The tragedy of the Titanic is interesting to me because of the complex social ties it has with how society treats people of different class, gender, and family status. I am interested in data science as a whole because I want to use STEM and statistics to solve real-world humanitarian problems in my career once I graduate.
+
+## Coding Notes:
+
+For this deliverable, we used only the tools and resources provided in class, including lectures, in-class activities, course readings, lecture slides, and TA office hours.
+
+# Thank you!
