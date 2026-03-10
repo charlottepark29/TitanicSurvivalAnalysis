@@ -1,0 +1,377 @@
+---
+title: "Surviving the Titanic"
+author: "Anissa, Charlotte, Elsa"
+format:
+  dashboard: 
+    logo: "https://thumbs.dreamstime.com/b/titanic-iceberg-original-oil-painting-ocean-night-canvas-full-moon-stars-modern-impressionism-200487951.jpg"
+    theme: lux
+    embed-resources: true
+---
+
+# Overview
+
+## Big Picture Question {height="10%"}
+
+::: {.card title="Who Is Most Likely to Survive the Titanic? (Click expand to see more)"}
+The question we want to answer is what would make you most likely to have survived the Titanic. We want to look at factors like age, sex, class of ticket, family relations, and other factors that might have impacted survival rate. The tragedy of the Titanic is often framed as a tragedy of technological error, but it can also tell us about a deeper narrative about inequality, social norms, and human behavior in crisis. The theme we want to focus on is how survival in the Titanic was not random, but was actually heavily influenced by social hierarchies and relationships. 
+
+We used these two data sets: Data Set 1:<https://www.kaggle.com/competitions/titanic/overview> Data Set 2:<https://www.encyclopedia-titanica.org/titanic-survivors/>
+:::
+
+## Three Questions {height="40%"}
+
+### Question 1 {width="33%"}
+
+::: {.card title="Question 1"}
+The first question we want to answer is: **How did gender influence survival rates on the Titanic?** Some background information for this question can be found at <https://medium.com/silk-stories/women-and-children-first-9273e97289b0> 
+
+This question is important because it explores whether survival on the Titanic was influenced by social norms rather than chance. During the early 20th century, there was a strong cultural expectation of “women and children first,” meaning that women may have been given priority access to lifeboats. By analyzing how gender affected survival rates, this project helps reveal whether these social values were actually reflected in the life or death situation of the Titanic. Understanding these patterns provides insight into how gender roles can shape outcomes in critical situations, making this question both historically meaningful and relevant to future discussions of fairness and ethics. 
+:::
+
+### Question 2 {width="33%"}
+
+::: {.card title="Question 2"}
+The second question we want to answer is: **Is missing age data randomly distributed, or does it correlate with class or survival?**
+
+Both of the datasets we used had missing data for various columns among different passengers. The data with the most missing was the age data which in our dataframe had 177 missing entries. As we learned in class and as this article suggests https://medium.com/@tarangds/the-impact-of-missing-data-on-statistical-analysis-and-how-to-fix-it-3498ad084bfe we thought it was important to rather than ignore the missing data try and analyze why it might be missing. Throughout this process we have learned that there are many inequalities highlighted in the tragedy of the Titanic and wondered if some of those inequalities persisted in the legacy of survivors and victims. Lots of previous research has shown that passenger class impacted the survival of those on the Titanic, but we want to understand if class also might have impacted how history remembers different passengers. We also were curious if survival was a determining factor on if age data could be obtained. 
+:::
+
+### Question 3 {width="34%"}
+
+:::: {.card title="Question 3"}
+**What were the demographics of people's ticket classes on different survival boats? Were there some with more lower-class people and did other boats only have first class passengers? Did the demographics of individual survival boats match the classes of the overall survivors?**
+
+There were 18 life boats that were frantically filled with people while the ship was sinking. A general rule was that women and children could board first, however there was a lot of randomness that was involved during this time of panic, and I am curious about how ticket class was involved in this. The article https://www.encyclopedia-titanica.org/the-average-lifeboat.html dives into the demographics of the "average" life boat and how it is disproportionate to the demographics of the people aboard the Titanic itself. I am curious about how else I can compare more filtered data to the "average" life boat, and whether the life boats actually reflected these basic demographics.
+
+Analyzing the ticket class demographics of the life boats helps the reader get a better sense of who was actually saved. I think it is interesting to look into how different boats could have had different groups of people on them, for instance maybe a boat had only first-class passengers while another one had a lot of young mothers and third-class children. I hope that this comparison betters our understanding of how the passengers behaved during this time of crisis.
+
+::: {#fig-my-figure}
+![](/Users/elsaboardman/Desktop/survivalboats.png)
+
+(image credit: https://en.wikipedia.org/wiki/Lifeboats_of_the_Titanic#Number_and_types_of_lifeboats)
+:::
+::::
+
+## Ethical Limitations {height="40%"}
+
+### Ethical Consideration #1 {width="40%"}
+
+::: {.card title="Ethical Consideration #1"}
+The data and story of the Titanic are based on the lives and experiences of real people, so we must ask ourselves questions like, “Is this analysis being done respectfully?” and “Are we reducing human lives to just numbers?” It is important to recognize that behind each data point is a person who experienced a tragic event, so the analysis should avoid being insensitive.
+:::
+
+### Ethical Consideration #2 {width = 60%}
+
+::: {.card title="Ethical Consideration #2"}
+Another limitation is that the data set is incomplete and may contain missing or inaccurate information. For example, variables like age have missing values, and some records may not be fully reliable due to the conditions under which the data was collected. Additionally, because the Titanic disaster is a historical event, we may never have a complete or perfectly accurate account of what happened to every individual. This means that any conclusions drawn from the analysis may not fully explain why certain individuals survived while others did not.
+:::
+
+```{r}
+#Load Libraries
+library(tidyverse)
+library(plotly)
+titanic_dataset_1 <- read.csv("train.csv")
+titanic_dataset_2 <- read.csv("titanic_dataset2.csv")
+```
+
+```{r}
+#| output: false
+# Join data sets
+joined_df <- titanic_dataset_1 |>
+  inner_join(
+    titanic_dataset_2,
+    join_by(Name == name, Sex == sex, Survived == survived, Pclass == pclass, Embarked == embarked, Age == age, Ticket == ticket, Fare == fare, Cabin == cabin)
+  )
+```
+
+```{r}
+#| output: false
+# Numeric value to words
+joined_df <- joined_df %>%
+  mutate(Survived = ifelse(Survived == 0, "dead", "alive"))
+```
+
+```{r}
+#| output: false
+## Make two seperate data frames dividing by gender
+women_df <- 
+  joined_df %>%
+  filter(Sex =="female")
+
+men_df <-
+  joined_df %>%
+  filter(Sex =="male")
+```
+
+```{r}
+#| output: false
+# Women stats
+women_df %>%
+  summarise(num_survivedw = sum(Survived == "alive"))
+women_df%>%
+count(Survived)
+```
+
+```{r}
+#| output: false
+# Men stats
+men_df %>%
+  summarise(num_survivedm = sum(Survived == "alive"))
+men_df %>%
+  count(Survived)
+```
+
+```{r}
+#| output: false
+# Makes a new data frame showing Total Women and how many dead
+women_summary <- women_df %>%
+  summarise(
+    Total_Women = n(),
+    Survived = sum(Survived == "alive"))
+# Gender data set so includes both men and women summary 
+gender_survival <- joined_df %>%
+  group_by(Sex) %>%
+  summarise(
+    total = n(),
+    survived = sum(Survived == "alive"),
+  )
+# Makes a new data frame presenting the survived rates into rounded percents (might need to round down)
+gender_survival_per <- gender_survival %>%
+  mutate(survived = round(survived / total *100 ))
+
+# Total people
+total_people <- joined_df %>%
+  nrow()
+```
+
+# Question 1
+
+**How did gender influence survival rates on the Titanic?**
+
+This bar chart shows the number of Titanic passengers who survived, grouped by gender. The visualization reveals a clear difference in survival outcomes, with female passengers having a much higher number of survivors than male passengers, suggesting that gender played a significant role in survival during the disaster. This pattern aligns with the historical evacuation practice of “women and children first,” which likely increased survival rates for female passengers. The graph is also interactive, when hovering over each bar, a tiny box appears that provides a summary including the gender, total number of survivors for that gender, and total passengers separated by gender, allowing users to explore the data more closely.
+
+**Basic Tool:** Using our join_df data frame, we used the **mutate()** function to create a new data frame called gender_survival, which was then used to generate this visualization.
+
+```{r}
+p <- ggplot(gender_survival) +
+  geom_col(aes(
+    x = Sex,
+    y = survived,
+    fill = Sex,
+    text = paste("Gender:", Sex,
+                 "<br>Survival Rate:", round(survived, 2) ,
+                 "<br>Total:", total)
+                 
+        
+  ))
+ggplotly(p, tooltip = "text")
+```
+
+# Question 2
+::: {.row}
+### Analysis {width="45%"}
+**Is missing age data randomly distributed, or does it correlate with class or survival?**
+
+This heatmap represents the percentages of missing age data for each boat class and survival status. The lighter the shade of blue the higher the percentage of missing age data there is for that specific demographic. We can understand from the graph that class was seeming a factor in if age data was able to be collected or not. 
+
+I used the basic tools mutate, group_by, and summarize to create a variable that identifies when age data is missing and to calculate the percentage of missing age values for each group. I then used the novel visualization tool of a heatmap (geom_tile) to represent these percentages visually, allowing differences between passenger classes and survival groups to be easily compared.
+### Visualization {width="55%"}
+```{r}
+missing_age_df <- joined_df |>
+  mutate(age_missing = is.na(Age))
+missing_age_summary <- missing_age_df |>
+  group_by(Pclass, Survived) |>
+  summarize(percent_missing = mean(age_missing) * 100)
+missing_age_plot <-
+  ggplot(missing_age_summary, aes(x = Pclass, y = factor(Survived), fill = percent_missing)) +
+  # here using the novel tool of a heatmap
+  geom_tile() +
+  labs(
+    title = "Percentage of Missing Age Data by Passenger Class and Survival",
+    x = "Passenger Class",
+    y = "Survival",
+    fill = "Percent of Missing Age Data"
+  )
+missing_age_plot
+```
+:::
+
+# Question 3
+
+## Question 3
+
+### Analysis {width="35%"}
+
+#### Question {height="40%"}
+
+::: {.card title="Question 3"}
+**What were the demographics of people's ticket classes on different survival boats? Were there some with more lower-class people and did other boats only have first class passengers? Did the demographics of individual survival boats match the classes of the overall survivors?**
+:::
+
+#### Visualization Insights {height="60%"}
+
+::: {.card title="Insights"}
+I created three visualizations of randomly selected survival boats - numbers 5, 11, and 15. I then compared the dispersion of people among different ticket classes to the overall survivor's data. I learned that there was a lot of randomness that went into who was in each life boat, because the three random visualization that I made did not match the overall average of the fourth one.
+
+For this visualization, I used the basic tools of summarize and filter to wrangle the data and make data frames of individual survival boats. With these new data frames, I could plot the information of the ticket classes of the survivors on various lifeboats and accurately compare it to the average.
+:::
+
+### Visualization {width="65%"}
+
+```{r}
+#| output: false
+survived_df <-
+  joined_df |>
+  filter(Survived == "alive")
+
+survived_df <- 
+  survived_df[survived_df$boat != "", ]
+
+Pclass <- as.integer(survived_df$Pclass)
+
+class(Pclass)
+
+survived_df_filtered <-
+  survived_df |>
+  filter(boat == "5"| boat == "11" | boat == "15")
+
+boat_5_df <-
+  survived_df |>
+  filter(boat == "5")
+
+boat_11_df <-
+  survived_df |>
+  filter(boat == "11")
+
+boat_15_df <-
+  survived_df |>
+  filter(boat == "15")
+```
+
+```{r}
+#| title: "Visualizations - Comparing Class Demographics Accross Different Life Boats"
+
+
+
+plot_5 <-
+  ggplot(boat_5_df) +
+  geom_col(aes(x = Pclass, y = num(Pclass), fill = Pclass)) +
+   xlim(0,3.5) +
+    labs(
+    title = "Life Boat 5",
+    x = "Class",
+    y = "Frequency",
+    fill = "Class"
+  )
+
+plot_11 <-            
+  ggplot(boat_11_df) +
+  geom_col(aes(x = Pclass, y = num(Pclass), fill = Pclass)) +
+  labs(
+    title = "Life Boat 11",
+    x = "Class",
+    y = "Frequency",
+    fill = "Class"
+  )
+            
+plot_15 <-
+  ggplot(boat_15_df) +
+   geom_col(aes(x = Pclass, y = num(Pclass), fill = Pclass)) +
+  labs(
+    title = "Life Boat 15",
+    x = "Class",
+    y = "Frequency",
+    fill = "Class"
+  )
+
+plot_all <-
+  ggplot(survived_df) +
+    geom_col(aes(x = Pclass, y = num(Pclass), fill = Pclass)) +
+  labs(
+    title = "All Survivors",
+    x = "Class",
+    y = "Frequency",
+    fill = "Class"
+  )
+
+library(gridExtra)
+
+grid.arrange(plot_5, plot_11, plot_15, plot_all, nrow = 2, ncol = 2)
+```
+
+# Data Context
+
+## Data Set 1 {height="50%"}
+
+### Information {width="30%"}
+
+::: {.card title="Data Set 1 Information"}
+**Data Set 1 Title:** Titanic – Machine Learning from Disaster.
+
+**Public Link**: <https://www.kaggle.com/competitions/titanic/overview>.
+
+**Created/Compiled By:** Kaggle (owned by Google), The passenger information was compiled from historical ship manifests and archived records
+:::
+
+### Description {width="70%"}
+
+::: {.card title="Data Set 1 Description"}
+The data set includes 891 passengers who boarded the RMS Titanic in 1912 during its voyage from Southampton, England to New York City across the North Atlantic. Each row represents one passenger, and variables such as age, sex, passenger class, ticket information, and survival status were recorded using official ship manifests and later historical rescue records. Each recording documents the demographic and socioeconomic characteristics of a single passenger. Although this sample provides real historical data that helps analyze survival patterns among Titanic passengers, it is limited because it includes some missing values, and may not fully represent the entire population of individuals aboard the Titanic.
+:::
+
+## Data Set 2 {height="50%"}
+
+### Information {width="30%"}
+
+::: {.card title="Data Set 2 Information"}
+**Data Set 2 Title:** Titanic Disaster Dataset 
+
+**Public Link:** <https://data.world/nrippner/titanic-disaster-dataset> 
+
+**Created/Compiled By:** Nick Rippner (Data.World contributor); the original passenger information was compiled from historical ship manifests, Titanic inquiry records, and archived historical documents.
+:::
+
+### Description {width="70%"}
+
+::: {.card title="Data Set 2 Description"}
+This data set is from data.world which is a data catalog like Kaggle and was posted by Noah Rippner. The data was collected from historical records of the Titanic passengers like manifestos that recorded the passenger data, as well as records that shared bodies recovered and the boats the survived escaped on. The source is reliable because it is based on primary historical documents and has been cleaned and validated across multiple independent releases, demonstrating that it is a reliable data set. The data represents individual Titanic passenger and includes some of the same demographic information as the first data set, along with data on the boats surviving passengers escaped on, number of when the body was recovered, and primary home destination or intended home destination. The information on home destination can share class information by giving insight on if the voyage for the passenger was more for pleasure or transportation. This data set contains 12 columns with the new included information being home.dest, body, and boat. Home destination is a column that includes both the hometown of some passengers and the indented settling home of others. Some passengers were returning home to Europe after visiting the U.S. while others value represented where they were planning to live in America. The body data shares all 337 recovered body in order and the boat data represents the boat the passenger escaped on. The boats were labeled 1-16, but there were also 4 smaller boats that were labeled A, B, C, and D, which makes the data a little confusing for this column as there are both letter and number values. Like the first data set there are missing values in several variables. Both boat and body have lots of missing values because they can only be populated depending on survival or not. Also some columns have inconsistencies in how some variables are recorded. For example, the home.dest column contains entries at different levels of detail, ranging from full city and country names to vague or incomplete locations, which makes geographic comparisons difficult without further cleaning.The dataset also only includes passengers (not crew members), which means it may not fully represent the entire population involved in the Titanic disaster.
+:::
+
+# Summary
+
+Throughout this project we were able to discover many insights about the tragedy of the Titanic that have been able to go beyond the history that we have previously understood. By analyzing the passenger data, we looked at how various factors influenced survival outcomes. Our big picture question focused on understanding what characteristics made someone most likely to survive the disaster. One major takeaway from our analysis is that as we expected survival was not random. In particular, gender had a strong influence on survival rates. Our visualization showed that women survived at a much higher rate than men, which supports the historical idea of “women and children first.” This as we predicted can show us how social norms are highlighted in crisis situations. 
+
+Furthermore, we were able to understand that though there were many aspects of survival rate that were not random there was still variability. Our exploration of lifeboat demographics revealed that there was a significant amount of variability in who ended up on each boat. When comparing the ticket class distributions of individual lifeboats to the overall distribution of survivors, we found that the patterns did not always match. Lifeboats seemed to have  different proportions of passenger classes, suggesting that there was some randomness involved when people boarded the boats during the panic of the disaster. 
+
+Another important finding from our project was related to missing data, specifically missing age values. By examining whether missing age data was randomly distributed across passenger classes and survival outcomes, we were able to see that class and survival impacted if age data existed in the data or not. Passengers in the third class had over ¼ of their age data missing compared to much lower percentages of missing data in the higher classes. Also between classes 1 and 2 there was less missing data among survivors. This can tell us that not just were their inequalities highlighted in the surviving outcomes of Titanic tragedy, but that the historical data available of passengers also was impacted by class difference. 
+
+Overall we were able to take away that survival on the Titanic was influenced by social structures and circumstances, not purely chance. The factors that we explored like gender, class, and life boats were able to give us some understanding of the event and what impacted survival. However, because our datasets only include passengers and not crew members, and because some values are missing or incomplete, our results definitely cannot perfectly represent the entire situation. 
+
+
+# Meet The Team
+
+## Get to know the UW students who worked on this project
+
+### Anissa
+
+::: {.card title="Anissa Vichitthavong"}
+**(Pre-Science, University of Washington; anissav\@uw.edu)**
+
+I am interested in the Titanic topic because the tragedy is still surrounded by mystery, and many details will never be fully known since so much history was lost beneath the ocean. As a freshman at the university, I am still exploring different career paths, but I am interested in informatics because I like how it is technical and involves working with real-world data.
+:::
+
+### Charlotte
+
+::: {.card title="Charlotte Park"}
+**(Informatics, University of Washington; cpark29\@uw.edu)**
+
+I think that our topic on the Titanic is both interesting and relevant because it gives us insight into social norms in crisis which can highlight inequalities. I am interested in the stories that data can tell us much beyond numbers, and am very interested in how data and technology systems can be utilized to address global issues and inequalities.
+:::
+
+### Elsa
+
+::: {.card title="Elsa Boardman"}
+**(Pre-Science, University of Washington; elsab29\@uw.edu)**
+
+The tragedy of the Titanic is interesting to me because of the complex social ties it has with how society treats people of different class, gender, and family status. I am interested in data science as a whole because I want to use STEM and statistics to solve real-world humanitarian problems in my career once I graduate.
+:::
